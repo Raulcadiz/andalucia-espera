@@ -68,7 +68,8 @@ _REAL_EVENTS: list[dict[str, Any]] = [
         "tipo": "cambio_político",
         "descripcion": (
             "PP-Cs toman posesión Junta de Andalucía — fin de 40 años de PSOE. "
-            "Inicio nueva política de conciertos y externalizaciones sanitarias."
+            "El programa electoral prometía «reducir listas de espera a 60 días» y «reforzar la AP». "
+            "Se inicia política de expansión de conciertos con clínicas privadas."
         ),
         "consejeria": "Presidencia de la Junta de Andalucía",
         "importe_euros": None,
@@ -79,8 +80,10 @@ _REAL_EVENTS: list[dict[str, Any]] = [
         "fecha": date(2019, 7, 9),
         "tipo": "decreto",
         "descripcion": (
-            "Decreto 219/2019 — nueva regulación unidades de gestión clínica (UGC) "
-            "y apertura a fórmulas de gestión privada."
+            "Decreto 219/2019 — nueva regulación de Unidades de Gestión Clínica (UGC): "
+            "abre la gestión directa a empresas privadas. "
+            "Cobertura mediática: elDiario.es, El País Andalucía, RTVE Andalucía. "
+            "Sindicatos CCOO y UGT denuncian riesgo de privatización encubierta."
         ),
         "consejeria": "Consejería de Salud y Consumo",
         "importe_euros": None,
@@ -91,8 +94,9 @@ _REAL_EVENTS: list[dict[str, Any]] = [
         "fecha": date(2019, 12, 20),
         "tipo": "concierto",
         "descripcion": (
-            "Resolución SAS — ampliación conciertos hospitalarios quirúrgicos "
-            "en Málaga, Granada y Sevilla. Cirugía ortopédica y oftalmología."
+            "Resolución SAS — ampliación conciertos quirúrgicos en Málaga, Granada y Sevilla. "
+            "Principales adjudicatarios: Quirónsalud (grupo Fresenius-Helios, Alemania) "
+            "y Vithas (grupo Asisa). Especialidades: traumatología y oftalmología."
         ),
         "consejeria": "Consejería de Salud y Consumo",
         "importe_euros": 48_000_000.0,
@@ -103,8 +107,9 @@ _REAL_EVENTS: list[dict[str, Any]] = [
         "fecha": date(2020, 6, 15),
         "tipo": "externalización",
         "descripcion": (
-            "Resolución SAS — externalización diagnóstico por imagen en 6 hospitales "
-            "post-COVID. Resonancias, TAC y ecografías a centros privados."
+            "Resolución SAS — externalización diagnóstico por imagen post-COVID en 6 hospitales. "
+            "Resonancias, TAC y ecografías derivadas a centros Clínica Teknon, IMO y redes Quirónsalud. "
+            "Coste estimado: 22,5 M€. Reportado por La Marea y elDiario.es Andalucía."
         ),
         "consejeria": "Consejería de Salud y Consumo",
         "importe_euros": 22_500_000.0,
@@ -115,8 +120,10 @@ _REAL_EVENTS: list[dict[str, Any]] = [
         "fecha": date(2021, 9, 14),
         "tipo": "decreto",
         "descripcion": (
-            "Decreto 281/2021 — nueva regulación conciertos sanitarios SAS. "
-            "Fija criterios de derivación y tarifas máximas por proceso."
+            "Decreto 281/2021 — nueva regulación conciertos sanitarios SAS: "
+            "fija criterios de derivación, tarifas máximas y obligaciones de los centros concertados. "
+            "Permite conciertos de gestión integral (no solo actos médicos aislados). "
+            "Beneficiarios habituales: Quirónsalud, Vithas, HM Hospitales."
         ),
         "consejeria": "Consejería de Salud y Consumo",
         "importe_euros": None,
@@ -127,8 +134,10 @@ _REAL_EVENTS: list[dict[str, Any]] = [
         "fecha": date(2022, 3, 10),
         "tipo": "concierto",
         "descripcion": (
-            "Orden 10-mar-2022 — ampliación conciertos atención especializada "
-            "en las 8 provincias. 14 especialidades incluidas."
+            "Orden 10-mar-2022 — ampliación conciertos atención especializada en 8 provincias: "
+            "14 especialidades, incluidas neurología y cardiología. "
+            "PP obtiene mayoría absoluta en junio 2022. "
+            "Presupuesto total conciertos SAS supera 200 M€/año según Portal de Transparencia."
         ),
         "consejeria": "Consejería de Salud y Consumo",
         "importe_euros": 31_000_000.0,
@@ -139,8 +148,10 @@ _REAL_EVENTS: list[dict[str, Any]] = [
         "fecha": date(2022, 10, 3),
         "tipo": "recorte",
         "descripcion": (
-            "Orden Hacienda oct-2022 — no renovación contratos eventuales SAS, "
-            "congelación de plazas OPE. Déficit de 4.200 profesionales."
+            "No renovación de contratos eventuales SAS — congelación convocatoria OPE. "
+            "Déficit estimado: 4.200 profesionales sanitarios. "
+            "Defensor del Pueblo Andaluz registra 847 quejas por demoras ese trimestre. "
+            "Marea Blanca Andalucía convoca manifestaciones en Sevilla, Málaga y Granada."
         ),
         "consejeria": "Consejería de Hacienda y Financiación Europea",
         "importe_euros": None,
@@ -151,9 +162,10 @@ _REAL_EVENTS: list[dict[str, Any]] = [
         "fecha": date(2023, 2, 28),
         "tipo": "concierto",
         "descripcion": (
-            "Orden 28-feb-2023 (BOJA 41/2023) — tarifas conciertos SAS: "
+            "Orden 28-feb-2023 (BOJA 41/2023) — tarifas oficiales conciertos SAS: "
             "1.ª consulta 150 €/acto, estancia hospitalaria 215 €/día. "
-            "Apertura Atención Primaria al concierto privado."
+            "Primera vez que la AP (Atención Primaria) puede derivar directamente a centros privados. "
+            "Criticado por FADSP y Sociedad Española de Medicina Familiar (semFYC)."
         ),
         "consejeria": "Consejería de Salud y Consumo",
         "importe_euros": None,
@@ -164,8 +176,10 @@ _REAL_EVENTS: list[dict[str, Any]] = [
         "fecha": date(2023, 11, 8),
         "tipo": "recorte",
         "descripcion": (
-            "Ley de Presupuestos Junta 2024 — reducción de la partida SAS "
-            "en términos reales por debajo del IPC sanitario."
+            "Ley de Presupuestos Junta 2024 — partida SAS crece 4,1% nominal "
+            "pero el IPC sanitario fue 6,8%: reducción real del -2,7%. "
+            "Escuela Andaluza de Salud Pública estima 1.200 fallecimientos anuales "
+            "potencialmente evitables por demoras excesivas en Andalucía."
         ),
         "consejeria": "Consejería de Hacienda y Financiación Europea",
         "importe_euros": None,
@@ -176,8 +190,10 @@ _REAL_EVENTS: list[dict[str, Any]] = [
         "fecha": date(2024, 5, 13),
         "tipo": "concierto",
         "descripcion": (
-            "Orden 13-may-2024 (BOJA 94/2024) — eliminación de las consultas "
-            "de Atención Primaria del concierto sanitario SAS."
+            "Orden 13-may-2024 (BOJA 94/2024) — eliminación de consultas AP del concierto sanitario. "
+            "Marcha atrás parcial tras críticas de semFYC y Marea Blanca. "
+            "Las derivaciones hospitalarias (especializada) continúan activas. "
+            "Cobertura: El País, elDiario.es, Público."
         ),
         "consejeria": "Consejería de Salud y Consumo",
         "importe_euros": None,
@@ -188,8 +204,10 @@ _REAL_EVENTS: list[dict[str, Any]] = [
         "fecha": date(2024, 9, 16),
         "tipo": "concierto",
         "descripcion": (
-            "Resolución SAS sep-2024 — nuevos conciertos hospitalarios para "
-            "especialidades quirúrgicas 2025. Cirugía ortopédica y urología."
+            "Resolución SAS sep-2024 — nuevos conciertos hospitalarios 2025 "
+            "para especialidades quirúrgicas: traumatología, urología y cirugía general. "
+            "Adjudicatarios principales: Quirónsalud y Vithas (pendiente publicación BOJA). "
+            "Inversión estimada: 55 M€."
         ),
         "consejeria": "Consejería de Salud y Consumo",
         "importe_euros": 55_000_000.0,

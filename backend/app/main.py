@@ -12,6 +12,7 @@ from sqlalchemy import text
 
 from .database import Base, engine
 from .routers import analysis as analysis_router
+from .routers import assistant as assistant_router
 from .routers import data as data_router
 from .scheduler import fetch_and_store_data, start_scheduler, stop_scheduler
 
@@ -92,6 +93,7 @@ app.add_middleware(
 
 app.include_router(data_router.router)
 app.include_router(analysis_router.router)
+app.include_router(assistant_router.router)
 
 if FRONTEND_DIST.exists():
     app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")
