@@ -14,7 +14,7 @@ def get_latest(db: Annotated[Session, Depends(get_db)]):
     results = (
         db.query(AnalysisResult)
         .order_by(AnalysisResult.ejecutado_en.desc())
-        .limit(200)
+        .limit(300)
         .all()
     )
     return [_serialize(r) for r in results]
@@ -39,6 +39,26 @@ def run_analysis_endpoint(
     return {"status": "ok", "results": results, "count": len(results)}
 
 
+@router.get("/top")
+def get_top_signals(
+    db: Annotated[Session, Depends(get_db)],
+    min_strength: str = "moderate",
+    limit: int = 20,
+):
+    """Devuelve solo las señales moderadas o fuertes más recientes."""
+    strengths = {"strong": ["strong"], "moderate": ["strong", "moderate"], "weak": ["strong", "moderate", "weak"]}
+    allowed = strengths.get(min_strength, ["strong", "moderate"])
+
+    results = (
+        db.query(AnalysisResult)
+        .filter(AnalysisResult.signal_strength.in_(allowed))
+        .order_by(AnalysisResult.ejecutado_en.desc(), AnalysisResult.p_value.asc())
+        .limit(limit)
+        .all()
+    )
+    return [_serialize(r) for r in results]
+
+
 @router.get("/history")
 def get_history(
     db: Annotated[Session, Depends(get_db)],
@@ -61,15 +81,19 @@ def get_history(
 
 def _serialize(r: AnalysisResult) -> dict:
     return {
-        "id": r.id,
-        "ejecutado_en": r.ejecutado_en.isoformat() if r.ejecutado_en else None,
-        "metrica": r.metrica,
-        "provincia": r.provincia,
-        "especialidad": r.especialidad,
-        "p_value": r.p_value,
-        "effect_size": r.effect_size,
+        "id":              r.id,
+        "ejecutado_en":    r.ejecutado_en.isoformat() if r.ejecutado_en else None,
+        "metrica":         r.metrica,
+        "provincia":       r.provincia,
+        "especialidad":    r.especialidad,
+        "p_value":         r.p_value,
+        "effect_size":     r.effect_size,
         "signal_strength": r.signal_strength,
-        "narrative": r.narrative,
-        "lookback_hours": r.lookback_hours,
-        "n_events": r.n_events,
+        "significant":     r.signal_strength != "none",
+        "narrative":       r.narrative,
+        "lookback_hours":  r.lookback_hours,
+        "n_events":        r.n_events,
+        "best_lag_hours":  getattr(r, "best_lag_hours",  None),
+        "consistency":     getattr(r, "consistency",     None),
+        "baseline_median": getattr(r, "baseline_median", None),
     }

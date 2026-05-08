@@ -29,6 +29,7 @@ class PrivatizacionEvent(Base):
     consejeria: Mapped[str] = mapped_column(String(256), nullable=False, default="")
     importe_euros: Mapped[float | None] = mapped_column(Float, nullable=True)
     fuente_url: Mapped[str] = mapped_column(String(512), nullable=False, default="")
+    confirmado: Mapped[bool] = mapped_column(Integer, nullable=False, default=0)
     creado_en: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
@@ -45,6 +46,9 @@ class AnalysisResult(Base):
     p_value: Mapped[float] = mapped_column(Float, nullable=False)
     effect_size: Mapped[float] = mapped_column(Float, nullable=False)
     signal_strength: Mapped[str] = mapped_column(String(32), nullable=False)
-    narrative: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    narrative: Mapped[str | None] = mapped_column(String(4096), nullable=True)
     lookback_hours: Mapped[int] = mapped_column(Integer, nullable=False, default=2160)
     n_events: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    best_lag_hours: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    consistency: Mapped[float | None] = mapped_column(Float, nullable=True)
+    baseline_median: Mapped[float | None] = mapped_column(Float, nullable=True)

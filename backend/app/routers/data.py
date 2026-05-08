@@ -65,6 +65,7 @@ def get_events(db: Annotated[Session, Depends(get_db)]):
             "consejeria": e.consejeria,
             "importe_euros": e.importe_euros,
             "fuente_url": e.fuente_url,
+            "confirmado": bool(getattr(e, "confirmado", False)),
         }
         for e in events
     ]

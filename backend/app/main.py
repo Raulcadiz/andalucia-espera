@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 
 from .database import Base, engine
 from .routers import analysis as analysis_router
@@ -27,13 +28,31 @@ _CORS_ORIGINS = [
 FRONTEND_DIST = Path(__file__).parent.parent.parent / "frontend" / "dist"
 
 
+def _run_migrations():
+    """Añade columnas nuevas a tablas existentes sin perder datos (SQLite)."""
+    migrations = [
+        ("privatizacion_events", "confirmado", "INTEGER NOT NULL DEFAULT 0"),
+        ("analysis_results",     "best_lag_hours",  "INTEGER"),
+        ("analysis_results",     "consistency",     "REAL"),
+        ("analysis_results",     "baseline_median", "REAL"),
+    ]
+    with engine.connect() as conn:
+        for table, col, typedef in migrations:
+            try:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {typedef}"))
+                conn.commit()
+                logger.info("Migración: %s.%s añadida", table, col)
+            except Exception:
+                pass  # columna ya existe
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
     Base.metadata.create_all(bind=engine)
     logger.info("Tablas SQLite creadas / verificadas")
 
-    # Carga inicial de datos si la BD está vacía
+    _run_migrations()
+
     from .database import SessionLocal
     from .models import WaitingRecord
     db = SessionLocal()
@@ -48,7 +67,6 @@ async def lifespan(app: FastAPI):
     start_scheduler()
     yield
 
-    # Shutdown
     stop_scheduler()
     logger.info("Scheduler detenido")
 
@@ -60,7 +78,7 @@ app = FastAPI(
         "eventos de privatización en Andalucía. "
         "Las correlaciones detectadas NO implican causalidad."
     ),
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
@@ -75,7 +93,6 @@ app.add_middleware(
 app.include_router(data_router.router)
 app.include_router(analysis_router.router)
 
-# Servir el frontend de React si el build existe
 if FRONTEND_DIST.exists():
     app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")
 
@@ -85,7 +102,6 @@ if FRONTEND_DIST.exists():
 
     @app.get("/{full_path:path}")
     def serve_spa(full_path: str):
-        # No interceptar rutas de la API
         if full_path.startswith("api/"):
             from fastapi import HTTPException
             raise HTTPException(status_code=404)
