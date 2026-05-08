@@ -1,0 +1,16 @@
+[Unit]
+Description=Andalucia Espera — SAS waiting list analysis
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/andalucia-espera/backend
+Environment="PATH=/opt/andalucia-espera/venv/bin"
+EnvironmentFile=/opt/andalucia-espera/.env
+ExecStart=/opt/andalucia-espera/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8112
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
