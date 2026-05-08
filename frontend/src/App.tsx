@@ -10,6 +10,10 @@ import {
   Clock, CheckCircle2, Building2, Scissors, FileText, ArrowUpRight,
   Minus, MessageCircle, Send, X, Lightbulb, Newspaper,
 } from 'lucide-react'
+import LegalComplianceSection from './components/LegalComplianceSection'
+import BudgetFlowSection from './components/BudgetFlowSection'
+import ActorsNetworkSection from './components/ActorsNetworkSection'
+import type { LegalResponse, BudgetResponse, ActorsResponse } from './types/analysis'
 import './index.css'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -758,6 +762,12 @@ export default function App() {
   const [analyzing, setAnalyzing]  = useState(false)
   const [toast, setToast]          = useState('')
 
+  // Nuevas secciones
+  const [legalData, setLegalData]   = useState<LegalResponse | null>(null)
+  const [budgetData, setBudgetData] = useState<BudgetResponse | null>(null)
+  const [actorsData, setActorsData] = useState<ActorsResponse | null>(null)
+  const [loadingExtra, setLoadingExtra] = useState(false)
+
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 4500) }
 
   useEffect(() => { document.documentElement.classList.toggle('dark', dark) }, [dark])
@@ -781,6 +791,19 @@ export default function App() {
   }, [])
 
   useEffect(() => { loadAll() }, [loadAll])
+
+  useEffect(() => {
+    setLoadingExtra(true)
+    Promise.all([
+      api.get('/legal/compliance-impact').catch(() => null),
+      api.get('/budget/analysis').catch(() => null),
+      api.get('/actors/influence').catch(() => null),
+    ]).then(([legalR, budgetR, actorsR]) => {
+      if (legalR)  setLegalData(legalR.data)
+      if (budgetR) setBudgetData(budgetR.data)
+      if (actorsR) setActorsData(actorsR.data)
+    }).finally(() => setLoadingExtra(false))
+  }, [])
 
   const handleRefresh = async () => {
     setRefreshing(true)
@@ -880,7 +903,10 @@ export default function App() {
         {/* ── 2. Impacto + Promesas ── */}
         <ImpactoYPromesas />
 
-        {/* ── 3. Mapa de señales ── */}
+        {/* ── 3. Marco legal ── */}
+        <LegalComplianceSection data={legalData} loading={loadingExtra} />
+
+        {/* ── 5. Mapa de señales ── */}
         <Card className="p-5">
           <SectionTitle icon={<BarChart2 size={15}/>}
             sub="Cada celda = provincia × especialidad. Rojo=fuerte · Naranja=moderada · Azul=débil · Gris=sin señal">
@@ -897,7 +923,7 @@ export default function App() {
           )}
         </Card>
 
-        {/* ── 4. Señales destacadas ── */}
+        {/* ── 5b. Señales destacadas ── */}
         {results.length > 0 && (
           <Card className="p-5">
             <SectionTitle icon={<TrendingUp size={15}/>}
@@ -908,7 +934,7 @@ export default function App() {
           </Card>
         )}
 
-        {/* ── 5. Gráfico ── */}
+        {/* ── 5c. Gráfico ── */}
         <Card className="p-5">
           <SectionTitle icon={<Activity size={15}/>}
             sub="Evolución trimestral · líneas rojas = eventos documentados">
@@ -920,7 +946,13 @@ export default function App() {
             analysisResult={activeResult} />
         </Card>
 
-        {/* ── 6. Actores e información adicional ── */}
+        {/* ── 6. Flujo de dinero ── */}
+        <BudgetFlowSection data={budgetData} loading={loadingExtra} />
+
+        {/* ── 7. Red de actores ── */}
+        <ActorsNetworkSection data={actorsData} loading={loadingExtra} />
+
+        {/* ── 8. Empresas e información adicional ── */}
         <div className="grid sm:grid-cols-2 gap-4">
           <Card className="p-4">
             <SectionTitle icon={<Building2 size={14}/>} sub="Principales beneficiarios de conciertos SAS según BOJA y Portal Transparencia">
@@ -970,10 +1002,10 @@ export default function App() {
           </Card>
         </div>
 
-        {/* ── 7. Tabla completa ── */}
+        {/* ── 9. Tabla completa ── */}
         {results.length > 0 && <FullResultsTable results={results} />}
 
-        {/* ── 8. Metodología ── */}
+        {/* ── 10. Metodología ── */}
         <Metodologia />
 
       </main>
