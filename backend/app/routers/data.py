@@ -19,7 +19,7 @@ def get_waiting_lists(
     especialidad: str | None = Query(None),
     desde: date | None = Query(None),
     hasta: date | None = Query(None),
-    limit: int = Query(100, ge=1, le=1000),
+    limit: int = Query(100, ge=1, le=5000),
     offset: int = Query(0, ge=0),
 ):
     q = db.query(WaitingRecord)
