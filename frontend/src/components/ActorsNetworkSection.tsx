@@ -175,7 +175,18 @@ export default function ActorsNetworkSection({ data, loading }: Props) {
       {open && (
         <div className="pb-4">
           {loading && (
-            <div className="py-6 text-center text-sm text-gray-400 animate-pulse">Cargando análisis de actores…</div>
+            <div className="border-t border-gray-100 dark:border-gray-700/30 animate-pulse">
+              {[1,2,3,4,5].map(i => (
+                <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 dark:border-gray-700/20">
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3.5 w-40 bg-gray-200 dark:bg-gray-700 rounded-full" />
+                    <div className="h-3 w-56 bg-gray-100 dark:bg-gray-700/60 rounded-full" />
+                  </div>
+                  <div className="h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded-full" />
+                  <div className="h-4 w-12 bg-gray-100 dark:bg-gray-700/60 rounded-full" />
+                </div>
+              ))}
+            </div>
           )}
           {!loading && !data && (
             <div className="py-6 text-center text-sm text-gray-400">No se pudo cargar la red de actores.</div>

@@ -181,7 +181,19 @@ export default function LegalComplianceSection({ data, loading }: Props) {
       {open && (
         <div className="px-5 pb-5 space-y-2.5">
           {loading && (
-            <div className="py-6 text-center text-sm text-gray-400 animate-pulse">Cargando análisis legal…</div>
+            <div className="space-y-2.5 animate-pulse">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="rounded-xl border border-gray-100 dark:border-gray-700/40 overflow-hidden">
+                  <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800/60">
+                    <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded-full" />
+                    <div className="h-4 flex-1 bg-gray-200 dark:bg-gray-700 rounded-full" />
+                    <div className="flex gap-1">
+                      {[1,2,3,4,5].map(j => <div key={j} className="w-2.5 h-4 bg-gray-200 dark:bg-gray-700 rounded-sm" />)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
           {!loading && !data && (
             <div className="py-6 text-center text-sm text-gray-400">No se pudo cargar el análisis legal.</div>

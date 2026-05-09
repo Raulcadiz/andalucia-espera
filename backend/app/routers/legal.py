@@ -24,17 +24,21 @@ _LEYES: list[dict] = [
         "ley": "Decreto 209/2018",
         "garantia": "Intervención quirúrgica en máximo 180 días (garantía de demora máxima)",
         "realidad": (
-            "Demora media en traumatología superó 250 días en 2023 según datos "
-            "Ministerio de Sanidad / CMBD. Andalucía entre las CCAA con mayor incumplimiento."
+            "Demora media en traumatología superó 250 días en 2023. "
+            "En 2025 la demora media quirúrgica en Andalucía es de 173 días "
+            "frente a 121 días de media nacional (Ministerio de Sanidad, 2T-2025). "
+            "Andalucía entre las CCAA con mayor incumplimiento sostenido."
         ),
         "hitos": [
             ("2018-12-01", 0.5, "Entrada en vigor; sistemas de medición parciales"),
             ("2019-06-01", 0.0, "EASP: incumplimiento en 6 de 8 provincias"),
             ("2020-04-01", 0.0, "RD 463/2020: suspensión de garantías por pandemia"),
             ("2021-09-01", 0.5, "Reanudación parcial; Junta activa derivaciones privadas (BOJA 200/2021)"),
-            ("2022-12-01", 0.0, "Defensor del Pueblo Andaluz: 847 quejas por incumplimiento (Q4/2022)"),
+            ("2022-12-01", 0.0, "Defensor del Pueblo: 847 quejas por listas de espera (Q4/2022)"),
             ("2023-06-01", 0.0, "Ministerio de Sanidad: Andalucía en peores ratios del SNS"),
+            ("2023-12-01", 0.0, "Defensor del Pueblo: quejas por listas de espera +58% en 2023 (1.150 quejas específicas)"),
             ("2024-01-01", 0.5, "Plan de choque SAS enero 2024; mejora parcial Málaga y Sevilla"),
+            ("2024-12-01", 0.0, "Defensor del Pueblo: 2.605 quejas sanitarias en 2024 (récord); +46.000 personas atendidas"),
         ],
     },
     {
@@ -43,7 +47,9 @@ _LEYES: list[dict] = [
         "garantia": "Tiempos máximos de espera para diagnóstico y consulta especializada en Andalucía",
         "realidad": (
             "Tiempo medio de consultas externas supera 90 días en 5 especialidades (2023). "
-            "Informe EASP: incumplimiento en 7 de 8 provincias para consultas programadas."
+            "Informe EASP: incumplimiento en 7 de 8 provincias para consultas programadas. "
+            "Las quejas al Defensor del Pueblo por demoras en consultas e intervenciones "
+            "se duplicaron en España en 2023 y registraron récord en Andalucía en 2024."
         ),
         "hitos": [
             ("2013-12-01", 0.5, "Entrada en vigor; Junta adapta sistemas de registro"),
@@ -52,7 +58,9 @@ _LEYES: list[dict] = [
             ("2019-01-01", 0.0, "EASP: consultas externas incumplen plazos en 7 de 8 provincias"),
             ("2020-04-01", 0.0, "Pandemia: colapso del sistema de citas presenciales"),
             ("2022-01-01", 0.5, "Recuperación gradual; lista diagnóstica sigue al alza"),
+            ("2023-12-01", 0.0, "Quejas por listas de espera duplicadas en España; pico en Andalucía"),
             ("2024-01-01", 0.5, "Digitalización de citas mejora parcialmente zonas urbanas"),
+            ("2024-12-01", 0.0, "Defensor del Pueblo: 2.605 quejas sanitarias (récord absoluto en Andalucía)"),
         ],
     },
     {

@@ -100,7 +100,15 @@ export default function BudgetFlowSection({ data, loading }: Props) {
       {open && (
         <div className="px-5 pb-5 space-y-4">
           {loading && (
-            <div className="py-6 text-center text-sm text-gray-400 animate-pulse">Cargando análisis presupuestario…</div>
+            <div className="space-y-4 animate-pulse">
+              <div className="grid grid-cols-3 gap-3">
+                {[1,2,3].map(i => <div key={i} className="h-16 bg-gray-100 dark:bg-gray-700/50 rounded-xl" />)}
+              </div>
+              <div className="h-56 bg-gray-100 dark:bg-gray-700/50 rounded-xl" />
+              <div className="grid grid-cols-3 gap-2">
+                {[1,2,3].map(i => <div key={i} className="h-20 bg-gray-100 dark:bg-gray-700/50 rounded-xl" />)}
+              </div>
+            </div>
           )}
           {!loading && !data && (
             <div className="py-6 text-center text-sm text-gray-400">No se pudo cargar el análisis presupuestario.</div>

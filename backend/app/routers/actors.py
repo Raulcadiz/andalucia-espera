@@ -41,6 +41,7 @@ _ACTORES: list[dict] = [
             {"fecha": "2022-07-25", "descripcion": "Presupuesto 2023: +4,1% nominal sanitario (IPC sanitario 6,8% → reducción real)", "fuente": "https://www.juntadeandalucia.es/hacienda/presupuestos/2023"},
             {"fecha": "2023-11-15", "descripcion": "Anuncio 200 M€ en infraestructuras sanitarias: hospitales de día", "fuente": "https://www.juntadeandalucia.es/presidencia/"},
             {"fecha": "2024-01-10", "descripcion": "Plan Andalucía Avanza Salud: objetivo reducir espera quirúrgica un 30%", "fuente": "https://www.juntadeandalucia.es/salud/"},
+            {"fecha": "2025-09-01", "descripcion": "Firma del acuerdo marco de 533 M€ a 4 años para procedimientos quirúrgicos con 38 empresas privadas. Demora media en Andalucía: 173 días vs 121 de media nacional", "fuente": "https://www.juntadeandalucia.es/salud/"},
         ],
     },
     {
@@ -53,6 +54,7 @@ _ACTORES: list[dict] = [
             {"fecha": "2020-09-10", "descripcion": "Ampliación concierto: diagnóstico por imagen y cirugía ambulatoria (BOJA 190/2020)", "fuente": "https://www.juntadeandalucia.es/boja/2020/190/"},
             {"fecha": "2022-03-15", "descripcion": "Nuevo contrato oftalmología: 28 M€, 5 provincias andaluzas", "fuente": "https://www.juntadeandalucia.es/boja/2022/58/"},
             {"fecha": "2023-09-01", "descripcion": "Adjudicación oncología ambulatoria: 35 M€ — primer contrato oncológico SAS-privado", "fuente": "https://www.juntadeandalucia.es/boja/2023/185/"},
+            {"fecha": "2025-09-01", "descripcion": "Adjudicataria del acuerdo marco de 533 M€ a 4 años (38 empresas); mayor beneficiaria histórica de conciertos SAS", "fuente": "https://www.juntadeandalucia.es/salud/"},
         ],
     },
     {
@@ -64,6 +66,7 @@ _ACTORES: list[dict] = [
             {"fecha": "2019-11-20", "descripcion": "Concierto especialidades médicas: 32 M€, Sevilla y Córdoba", "fuente": "https://www.juntadeandalucia.es/boja/2019/235/"},
             {"fecha": "2021-06-08", "descripcion": "Ampliación ginecología y urología: +18 M€ sobre contrato anterior", "fuente": "https://www.juntadeandalucia.es/boja/2021/118/"},
             {"fecha": "2023-04-20", "descripcion": "Nuevo hospital de día Vithas Sevilla: 20 M€ inversión privada con garantía pública", "fuente": "https://www.vithas.es/"},
+            {"fecha": "2025-09-01", "descripcion": "Adjudicataria del acuerdo marco de 533 M€ a 4 años junto a otras 37 empresas", "fuente": "https://www.juntadeandalucia.es/salud/"},
         ],
     },
     {

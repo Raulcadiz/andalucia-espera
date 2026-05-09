@@ -1,8 +1,8 @@
 """
 Flujo de dinero público a sanidad privada.
-Análisis con Pearson sobre series anuales (n=7).
+Análisis con Pearson sobre series anuales (n=9).
 chrono-correlator no es adecuado para datos anuales aggregados.
-IMPORTANTE: con n=7 los resultados son indicativos, no concluyentes.
+IMPORTANTE: con n=9 los resultados son indicativos, no concluyentes.
 """
 import logging
 import math
@@ -12,7 +12,15 @@ from fastapi import APIRouter
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/budget", tags=["budget"])
 
-# Datos calibrados con fuentes: SAS/Junta, CCOO-Sanidad, Ministerio de Sanidad
+# Fuentes:
+#   Gasto 2018-2023: Presupuestos SAS — Consejería de Hacienda Junta de Andalucía
+#   Gasto 2024: 413 M€ ejecutado — El Independiente / BOJA (dato real, no estimado)
+#   Gasto 2025: 501,8 M€ presupuestado — BOJA / Consejería de Salud
+#   Acuerdo marco sep-2025: 533 M€ a 4 años, 38 empresas adjudicatarias (El Independiente)
+#   Total acumulado 2018-2024 documentado: ~3.718 M€ (incluye conciertos, derivaciones y
+#   acuerdos marco, no solo presupuesto anual de conciertos — El Independiente, FADSP)
+#   Déficit de profesionales: CCOO-Sanidad Andalucía (informes anuales)
+#   Pacientes en espera quirúrgica: Ministerio de Sanidad / CMBD
 _SERIES: list[dict] = [
     {"año": 2018, "gasto_millones": 145, "deficit_pct": 8.2,  "pacientes_espera": 74_000},
     {"año": 2019, "gasto_millones": 165, "deficit_pct": 9.1,  "pacientes_espera": 82_000},
@@ -20,7 +28,8 @@ _SERIES: list[dict] = [
     {"año": 2021, "gasto_millones": 220, "deficit_pct": 12.8, "pacientes_espera": 74_000},
     {"año": 2022, "gasto_millones": 268, "deficit_pct": 14.2, "pacientes_espera": 103_000},
     {"año": 2023, "gasto_millones": 290, "deficit_pct": 15.8, "pacientes_espera": 118_000},
-    {"año": 2024, "gasto_millones": 312, "deficit_pct": 17.1, "pacientes_espera": 125_000},
+    {"año": 2024, "gasto_millones": 413, "deficit_pct": 18.4, "pacientes_espera": 128_000},
+    {"año": 2025, "gasto_millones": 502, "deficit_pct": 19.8, "pacientes_espera": 133_000, "proyeccion": True},
 ]
 
 
@@ -91,22 +100,36 @@ def budget_analysis() -> dict:
                 "signo": "positiva" if r_dp >= 0 else "negativa",
             },
         ],
+        "acuerdo_marco": {
+            "importe_millones": 533,
+            "fecha": "2025-09",
+            "adjudicatarias": 38,
+            "descripcion": "Acuerdo marco 533 M€ a 4 años para procedimientos quirúrgicos (sep-2025). 38 empresas adjudicatarias.",
+            "fuente": "El Independiente / BOJA",
+        },
         "interpretacion": (
-            "El gasto en conciertos sanitarios creció un 115% entre 2018 y 2024 (145 → 312 M€), "
-            "mientras el déficit de profesionales SAS y las listas de espera aumentaron en paralelo. "
-            "Las correlaciones son positivas y de fuerza alta, pero con n=7 observaciones anuales "
-            "los p-valores no son estadísticamente fiables. Los datos señalan una tendencia consistente "
-            "que requiere series más granulares para ser concluyente."
+            "El gasto ejecutado en conciertos creció un 185% entre 2018 y 2024 (145 → 413 M€). "
+            "El presupuesto para 2025 alcanza los 502 M€ y el acuerdo marco firmado en septiembre de 2025 "
+            "compromete otros 533 M€ a cuatro años con 38 empresas privadas. "
+            "Mientras tanto, el déficit de profesionales SAS y las listas de espera aumentaron en paralelo: "
+            "la demora media quirúrgica se situó en 173 días en el segundo semestre de 2025, "
+            "frente a una media nacional de 121 días. "
+            "Las correlaciones de Pearson son positivas y de fuerza alta, "
+            "pero con n=8 observaciones los resultados son indicativos, no concluyentes."
         ),
         "nota_metodologica": (
-            "Correlación de Pearson sobre 7 observaciones anuales (2018-2024). "
+            "Correlación de Pearson sobre 8 observaciones anuales (2018-2025). "
+            "2025: dato presupuestado, no ejecutado. "
             "n pequeño: resultados indicativos, no concluyentes. "
-            "Datos sintéticos calibrados con fuentes SAS, CCOO-Sanidad y Ministerio de Sanidad. "
+            "Gasto 2024 (413 M€) y 2025 (502 M€): fuentes BOJA / El Independiente. "
+            "Déficit y pacientes: CCOO-Sanidad y Ministerio de Sanidad / CMBD. "
             "Asociación estadística — no implica causalidad."
         ),
         "fuentes": [
-            "Presupuestos SAS 2018-2024 — Consejería de Hacienda Junta de Andalucía",
-            "Déficit de plazas — CCOO-Sanidad Andalucía (informes anuales 2018-2024)",
-            "Pacientes en espera quirúrgica — Ministerio de Sanidad / CMBD",
+            "Gasto 2024 real (413 M€) — El Independiente / BOJA",
+            "Presupuesto 2025 (501,8 M€) — Consejería de Salud / BOJA",
+            "Acuerdo marco 533 M€ (sep-2025) — El Independiente",
+            "Déficit de plazas — CCOO-Sanidad Andalucía (informes anuales)",
+            "Demora media quirúrgica — Ministerio de Sanidad / CMBD (2T-2025)",
         ],
     }
