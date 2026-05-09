@@ -8,7 +8,7 @@ import {
   Moon, Sun, RefreshCw, ChevronDown, ChevronUp, ExternalLink,
   Activity, BarChart2, AlertTriangle, TrendingUp, TrendingDown,
   Clock, CheckCircle2, Building2, Scissors, FileText, ArrowUpRight,
-  Minus, MessageCircle, Send, X, Lightbulb, Newspaper,
+  Minus, MessageCircle, Send, X, Lightbulb, Newspaper, Download,
 } from 'lucide-react'
 import LegalComplianceSection from './components/LegalComplianceSection'
 import BudgetFlowSection from './components/BudgetFlowSection'
@@ -592,16 +592,64 @@ function Metodologia() {
         {open ? <ChevronUp size={13}/> : <ChevronDown size={13}/>}
       </button>
       {open && (
-        <div className="px-5 py-4 bg-white dark:bg-gray-900 text-xs text-gray-600 dark:text-gray-400 space-y-2.5 leading-relaxed">
-          <p><strong className="text-gray-800 dark:text-gray-200">Mann-Whitney U</strong> — compara demoras 90 días post-evento vs línea base del año anterior. No paramétrico, no asume distribución normal.</p>
-          <p><strong className="text-gray-800 dark:text-gray-200">Corrección FDR</strong> (Benjamini-Hochberg) — controla falsos positivos en 96 comparaciones simultáneas.</p>
-          <p><strong className="text-gray-800 dark:text-gray-200">find_best_lag</strong> — barrido 0–720 h para encontrar el desfase con mayor tamaño del efecto.</p>
-          <p><strong className="text-gray-800 dark:text-gray-200">SignificanceConfig</strong> — umbrales calibrados: efecto fuerte ≥ 0.25, moderado ≥ 0.15, débil ≥ 0.08.</p>
-          <p><strong className="text-gray-800 dark:text-gray-200">Datos</strong> — lista de espera: sintéticos calibrados con parámetros reales SAS (datos oficiales no disponibles por API). Eventos: BOJA y fuentes oficiales documentadas.</p>
+        <div className="px-5 py-4 bg-white dark:bg-gray-900 text-xs text-gray-600 dark:text-gray-400 space-y-3 leading-relaxed">
+
+          {/* Motor estadístico */}
+          <div>
+            <p className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Motor estadístico — chrono-correlator v1.2.0</p>
+            <p>Test de <strong className="text-gray-700 dark:text-gray-300">Mann-Whitney U</strong> para comparar la distribución de demoras en los 90 días posteriores a cada evento de privatización/recorte frente a una línea base del año anterior. No paramétrico — no asume distribución normal en los tiempos de espera.</p>
+          </div>
+
+          {/* Tabla de parámetros */}
+          <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                  <th className="text-left px-3 py-2 font-semibold">Parámetro</th>
+                  <th className="text-left px-3 py-2 font-semibold">Valor</th>
+                  <th className="text-left px-3 py-2 font-semibold">Justificación</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                {[
+                  ['baseline_strategy', '"same_month"', 'Compara cada evento con el mismo mes del año anterior para reducir ruido estacional en datos sanitarios trimestrales'],
+                  ['lookback_hours', '2 160 h (90 días)', 'Ventana post-evento: captura el efecto a corto-medio plazo sin mezclar eventos distintos'],
+                  ['baseline_days', '365 días', 'Línea base de un año completo para estabilizar la mediana de referencia'],
+                  ['bootstrap_ci', 'False', 'Desactivado en tiempo real (96 combinaciones); activar en análisis offline para intervalos de confianza robustos'],
+                  ['lag_range', '0–720 h, paso 72 h', 'Barrido de 11 desfases (0–30 días) para find_best_lag: detecta si el efecto aparece días después del evento'],
+                  ['alpha', '0.05', 'Nivel de significación estándar; con FDR controla el número esperado de falsos positivos'],
+                  ['strong_effect', '≥ 0.25', 'Umbral calibrado con estudios de variabilidad del SAS (efecto mínimo con relevancia práctica ≥ 0.20)'],
+                  ['moderate_effect', '≥ 0.15', 'Señal moderada: asociación presente aunque de menor magnitud'],
+                  ['weak_effect', '≥ 0.08', 'Señal débil: estadísticamente significativa pero de impacto reducido'],
+                  ['FDR (BH)', '96 comparaciones', '8 provincias × 12 especialidades; corrección de Benjamini-Hochberg sobre el conjunto completo'],
+                ].map(([param, val, desc], i) => (
+                  <tr key={i} className={i % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800/50'}>
+                    <td className="px-3 py-2 font-mono text-[10px] text-verde-sas dark:text-emerald-400 whitespace-nowrap">{param}</td>
+                    <td className="px-3 py-2 font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">{val}</td>
+                    <td className="px-3 py-2 text-gray-500 dark:text-gray-400">{desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Datos */}
+          <div>
+            <p className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Fuentes de datos</p>
+            <ul className="space-y-1 list-disc list-inside">
+              <li><strong className="text-gray-700 dark:text-gray-300">Listas de espera:</strong> datos sintéticos calibrados con parámetros reales del SAS. Los datos oficiales no están disponibles por API pública; la extracción automática del BOJA está en desarrollo.</li>
+              <li><strong className="text-gray-700 dark:text-gray-300">Eventos de privatización:</strong> BOJA (boja.juntadeandalucia.es), informes EASP, Defensor del Pueblo Andaluz y fuentes oficiales documentadas.</li>
+              <li><strong className="text-gray-700 dark:text-gray-300">Marco legal:</strong> hitos extraídos de Decreto 209/2018, Ley 7/2013, RD 1030/2006 y resoluciones del Defensor del Pueblo.</li>
+              <li><strong className="text-gray-700 dark:text-gray-300">Presupuesto:</strong> Consejería de Hacienda (Junta de Andalucía), datos.gob.es, Ministerio de Sanidad.</li>
+            </ul>
+          </div>
+
+          {/* Advertencia */}
           <div className="p-2.5 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
             <p className="font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1"><AlertTriangle size={12}/> Asociación estadística ≠ causalidad</p>
-            <p className="mt-1 text-amber-700 dark:text-amber-400">Factores estacionales, demográficos, pandémicos u otros no controlados pueden explicar los patrones detectados.</p>
+            <p className="mt-1 text-amber-700 dark:text-amber-400">Factores estacionales, demográficos, pandémicos u otros no controlados pueden explicar los patrones detectados. Este análisis no atribuye responsabilidad individual a ningún actor. Los datos de listas de espera son sintéticos calibrados.</p>
           </div>
+
         </div>
       )}
     </div>
@@ -862,6 +910,11 @@ export default function App() {
               <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''}/>
               <span className="hidden sm:inline">{refreshing ? 'Actualizando…' : 'Actualizar'}</span>
             </button>
+            <a href="/api/report/pdf" download
+              className="hidden sm:flex items-center gap-1.5 text-xs bg-white/15 hover:bg-white/25 text-white rounded-lg px-3 py-1.5 transition-colors"
+              title="Descargar informe estadístico en PDF">
+              <Download size={12}/><span className="hidden md:inline">Informe PDF</span>
+            </a>
             <button onClick={() => setDark(v => !v)} className="p-1.5 bg-white/15 hover:bg-white/25 text-white rounded-lg transition-colors">
               {dark ? <Sun size={13}/> : <Moon size={13}/>}
             </button>

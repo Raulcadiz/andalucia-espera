@@ -16,6 +16,7 @@ from .routers import assistant as assistant_router
 from .routers import budget as budget_router
 from .routers import actors as actors_router
 from .routers import legal as legal_router
+from .routers import report as report_router
 from .routers import data as data_router
 from .scheduler import fetch_and_store_data, start_scheduler, stop_scheduler
 
@@ -100,6 +101,7 @@ app.include_router(assistant_router.router)
 app.include_router(legal_router.router)
 app.include_router(budget_router.router)
 app.include_router(actors_router.router)
+app.include_router(report_router.router)
 
 if FRONTEND_DIST.exists():
     app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")

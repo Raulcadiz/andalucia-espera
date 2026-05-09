@@ -138,10 +138,11 @@ def _analyze(
 
     try:
         cfg = SignificanceConfig(alpha=0.05, strong_effect=0.25, moderate_effect=0.15, weak_effect=0.08)
-        try:
-            report = evaluate(events=events, metrics=[metric], lookback_hours=2160, baseline_days=365, significance_config=cfg)
-        except TypeError:
-            report = evaluate(events=events, metrics=[metric], lookback_hours=2160, baseline_days=365)
+        report = evaluate(
+            events=events, metrics=[metric],
+            lookback_hours=2160, baseline_days=365,
+            config=cfg, baseline_strategy="same_month",
+        )
 
         if report.results:
             cr = report.results[0]

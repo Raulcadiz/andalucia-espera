@@ -18,6 +18,11 @@ logger = logging.getLogger(__name__)
 LOOKBACK_HOURS = 2160   # 90 días antes/después del evento
 BASELINE_DAYS  = 365    # línea base de 1 año
 
+# baseline_strategy="same_month": compara cada evento con el mismo mes del año
+# anterior, reduciendo ruido estacional en datos sanitarios trimestrales.
+# Valores posibles: "rolling" (default), "same_weekday", "same_month".
+BASELINE_STRATEGY = "same_month"
+
 
 def _import_chrono():
     try:
@@ -35,6 +40,7 @@ def _import_chrono():
 # Umbrales calibrados para datos sanitarios trimestrales en Andalucía.
 # Los estudios de variabilidad del SAS sugieren effect_size >0.20 como
 # umbral mínimo de relevancia práctica (no solo estadística).
+# NOTA: el parámetro en evaluate() se llama `config=`, no `significance_config=`.
 _SIGNIFICANCE_CONFIG_KWARGS = dict(
     alpha=0.05,
     strong_effect=0.25,
@@ -163,15 +169,9 @@ def run_analysis(
             metrics=metrics,
             lookback_hours=LOOKBACK_HOURS,
             baseline_days=BASELINE_DAYS,
-            significance_config=sig_config,
-        )
-    except TypeError:
-        # Versión anterior de chrono-correlator sin significance_config
-        report = evaluate(
-            events=cc_events,
-            metrics=metrics,
-            lookback_hours=LOOKBACK_HOURS,
-            baseline_days=BASELINE_DAYS,
+            config=sig_config,                   # FIX: era 'significance_config' (nombre incorrecto)
+            baseline_strategy=BASELINE_STRATEGY, # Reduce ruido estacional
+            bootstrap_ci=False,                  # True en análisis offline; costoso con 96 combinaciones
         )
     except Exception as exc:
         logger.error("evaluate() falló: %s", exc)
@@ -210,6 +210,8 @@ def run_analysis(
                         lag_range=range(0, 721, 72),   # 0–720 h, paso 72 h (3 días)
                         lookback_hours=LOOKBACK_HOURS,
                         baseline_days=BASELINE_DAYS,
+                        config=sig_config,
+                        baseline_strategy=BASELINE_STRATEGY,
                     )
                     if lag_results:
                         best_lag_hours = max(
