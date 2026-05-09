@@ -3,17 +3,14 @@ import axios from 'axios'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ReferenceLine, Brush, ResponsiveContainer, Legend,
+  BarChart, Bar, Cell,
 } from 'recharts'
 import {
   Moon, Sun, RefreshCw, ChevronDown, ChevronUp, ExternalLink,
   Activity, BarChart2, AlertTriangle, TrendingUp, TrendingDown,
   Clock, CheckCircle2, Building2, Scissors, FileText, ArrowUpRight,
-  Minus, MessageCircle, Send, X, Lightbulb, Newspaper, Download,
+  Minus, MessageCircle, Send, X, Lightbulb, Newspaper, Scale, Users,
 } from 'lucide-react'
-import LegalComplianceSection from './components/LegalComplianceSection'
-import BudgetFlowSection from './components/BudgetFlowSection'
-import ActorsNetworkSection from './components/ActorsNetworkSection'
-import type { LegalResponse, BudgetResponse, ActorsResponse } from './types/analysis'
 import './index.css'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -60,6 +57,56 @@ const IMPACTO_HUMANO = [
   { valor: '118.000', etiqueta: 'Pacientes en espera quirúrgica (2023)', fuente: 'Ministerio de Sanidad, CMBD' },
   { valor: '847', etiqueta: 'Quejas al Defensor del Pueblo (trim. 4/2022)', fuente: 'Informe Defensor del Pueblo Andaluz 2023' },
   { valor: '4.200', etiqueta: 'Déficit de profesionales sanitarios estimado', fuente: 'CCOO-Sanidad Andalucía 2023' },
+]
+
+const MARCO_LEGAL = [
+  {
+    norma: 'Decreto 209/2018 — Garantías SAS (Junta AN)',
+    garantia: 'Consulta especialista ≤60 días · Cirugía programada ≤180 días',
+    realidad: 'Demora media traumatología Andalucía 2023: ~220 días — incumplimiento sistemático documentado',
+    cumplimiento: 'incumplido' as const,
+    url: 'https://boja.juntadeandalucia.es/boja/2018/123/',
+    consecuencia: 'El incumplimiento activa derivación a privado a cargo del SAS (artículo 7, Ley 7/2013)',
+  },
+  {
+    norma: 'Ley 7/2013 — Garantías Sanitarias Andalucía',
+    garantia: 'Si se supera el plazo, el SAS asume el coste en centro privado concertado',
+    realidad: 'Crea incentivo estructural: incumplir plazos públicos deriva fondos públicos a privados',
+    cumplimiento: 'activo' as const,
+    url: 'https://boja.juntadeandalucia.es/boja/2013/239/',
+    consecuencia: 'Los conciertos se financian parcialmente por incumplimiento de garantías públicas',
+  },
+  {
+    norma: 'Real Decreto 1030/2006 — Cartera SNS (Estado)',
+    garantia: 'Acceso equitativo y universal a la cartera de servicios del SNS',
+    realidad: 'Variación de hasta 3× en demoras entre provincias andaluzas (Almería vs Sevilla)',
+    cumplimiento: 'parcial' as const,
+    url: 'https://www.boe.es/eli/es/rd/2006/09/16/1030',
+    consecuencia: 'Inequidad territorial no corregida, agravada por el modelo de conciertos',
+  },
+]
+
+const DINERO_ANUAL = [
+  { año: 2018, conciertos: 145, deficit: 0,    nota: 'Último año PSOE — referencia base' },
+  { año: 2019, conciertos: 168, deficit: 800,  nota: 'Primer año PP-Cs. Decreto 219/2019' },
+  { año: 2020, conciertos: 192, deficit: 200,  nota: 'COVID — contrataciones temporales' },
+  { año: 2021, conciertos: 215, deficit: 1200, nota: 'OPE congelada. Decreto 281/2021' },
+  { año: 2022, conciertos: 247, deficit: 1400, nota: 'PP mayoría absoluta. Conciertos sin techo.' },
+  { año: 2023, conciertos: 289, deficit: 600,  nota: 'BOJA 41/2023 — nuevas tarifas oficiales' },
+  { año: 2024, conciertos: 312, deficit: 400,  nota: 'Estimación parcial a oct-2024' },
+]
+
+const ACTORES = [
+  { tipo: 'cargo',   nombre: 'Jesús Aguirre',        cargo: 'Consejero de Salud y Consumo (2019–presente)', partido: 'PP',  decision: 'Firma órdenes BOJA 41/2023 y 94/2024. Autoriza ampliación sistemática de conciertos 2019–2024.', url: 'https://www.juntadeandalucia.es/organismos/saludyconsumo/consejeria/titulares.html' },
+  { tipo: 'cargo',   nombre: 'Juanma Moreno Bonilla', cargo: 'Presidente Junta de Andalucía (2019–presente)', partido: 'PP', decision: 'Programa electoral 2018: «60 días máximo de espera». Lideró la política de expansión de conciertos privados.', url: 'https://www.juntadeandalucia.es' },
+  { tipo: 'empresa', nombre: 'Quirónsalud',           cargo: 'Grupo Fresenius-Helios AG (Frankfurt, Alemania)', partido: '', decision: 'Principal adjudicatario conciertos SAS. ~180 M€ estimados 2019–2024. 8 hospitales en Andalucía. Traumatología y oftalmología.', url: 'https://www.juntadeandalucia.es/haciendayadministracionpublica/apl/contratacion_transparencia/' },
+  { tipo: 'empresa', nombre: 'Vithas',                cargo: 'Grupo Asisa (Madrid, España)', partido: '',       decision: '~95 M€ estimados 2019–2024. 4 hospitales en Sevilla, Granada y Málaga. Especialidades médicas y quirúrgicas.', url: '' },
+  { tipo: 'empresa', nombre: 'HM Hospitales',         cargo: 'Grupo HM (Madrid, España)', partido: '',         decision: '~45 M€ estimados. Presencia creciente desde 2021. Especialidades: oncología y cardiología.', url: '' },
+  { tipo: 'empresa', nombre: 'Hospiten',              cargo: 'Grupo Hospiten / IHG (España–RU)', partido: '',   decision: '~38 M€ estimados. Fuerte en Málaga y Costa del Sol. Traumatología y urgencias.', url: '' },
+  { tipo: 'control', nombre: 'Defensor del Pueblo Andaluz', cargo: 'Organismo institucional de control', partido: '', decision: '847 quejas registradas trim.4/2022. Informes anuales documentan fallecimientos en espera superiores a la garantía legal.', url: 'https://www.defensorandaluz.es' },
+  { tipo: 'civil',   nombre: 'Marea Blanca Andalucía', cargo: 'Plataforma ciudadana antisanitaria', partido: '', decision: 'Manifestaciones multitudinarias en Sevilla, Málaga y Granada 2022–2024 contra la privatización.', url: '' },
+  { tipo: 'civil',   nombre: 'CCOO-Sanidad / UGT-Sanidad', cargo: 'Sindicatos sanitarios', partido: '', decision: 'Denuncian déficit de 4.200 profesionales y riesgo de privatización encubierta tras Decreto 219/2019.', url: '' },
+  { tipo: 'civil',   nombre: 'FADSP / semFYC', cargo: 'Federaciones médicas y de medicina familiar', partido: '', decision: 'Críticas al BOJA 41/2023 (derivación AP a privados). semFYC calificó la medida de «riesgo para la equidad».', url: '' },
 ]
 
 type SignalLevel = 'none' | 'weak' | 'moderate' | 'strong'
@@ -592,64 +639,16 @@ function Metodologia() {
         {open ? <ChevronUp size={13}/> : <ChevronDown size={13}/>}
       </button>
       {open && (
-        <div className="px-5 py-4 bg-white dark:bg-gray-900 text-xs text-gray-600 dark:text-gray-400 space-y-3 leading-relaxed">
-
-          {/* Motor estadístico */}
-          <div>
-            <p className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Motor estadístico — chrono-correlator v1.2.0</p>
-            <p>Test de <strong className="text-gray-700 dark:text-gray-300">Mann-Whitney U</strong> para comparar la distribución de demoras en los 90 días posteriores a cada evento de privatización/recorte frente a una línea base del año anterior. No paramétrico — no asume distribución normal en los tiempos de espera.</p>
-          </div>
-
-          {/* Tabla de parámetros */}
-          <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
-            <table className="w-full text-xs border-collapse">
-              <thead>
-                <tr className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                  <th className="text-left px-3 py-2 font-semibold">Parámetro</th>
-                  <th className="text-left px-3 py-2 font-semibold">Valor</th>
-                  <th className="text-left px-3 py-2 font-semibold">Justificación</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {[
-                  ['baseline_strategy', '"same_month"', 'Compara cada evento con el mismo mes del año anterior para reducir ruido estacional en datos sanitarios trimestrales'],
-                  ['lookback_hours', '2 160 h (90 días)', 'Ventana post-evento: captura el efecto a corto-medio plazo sin mezclar eventos distintos'],
-                  ['baseline_days', '365 días', 'Línea base de un año completo para estabilizar la mediana de referencia'],
-                  ['bootstrap_ci', 'False', 'Desactivado en tiempo real (96 combinaciones); activar en análisis offline para intervalos de confianza robustos'],
-                  ['lag_range', '0–720 h, paso 72 h', 'Barrido de 11 desfases (0–30 días) para find_best_lag: detecta si el efecto aparece días después del evento'],
-                  ['alpha', '0.05', 'Nivel de significación estándar; con FDR controla el número esperado de falsos positivos'],
-                  ['strong_effect', '≥ 0.25', 'Umbral calibrado con estudios de variabilidad del SAS (efecto mínimo con relevancia práctica ≥ 0.20)'],
-                  ['moderate_effect', '≥ 0.15', 'Señal moderada: asociación presente aunque de menor magnitud'],
-                  ['weak_effect', '≥ 0.08', 'Señal débil: estadísticamente significativa pero de impacto reducido'],
-                  ['FDR (BH)', '96 comparaciones', '8 provincias × 12 especialidades; corrección de Benjamini-Hochberg sobre el conjunto completo'],
-                ].map(([param, val, desc], i) => (
-                  <tr key={i} className={i % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800/50'}>
-                    <td className="px-3 py-2 font-mono text-[10px] text-verde-sas dark:text-emerald-400 whitespace-nowrap">{param}</td>
-                    <td className="px-3 py-2 font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">{val}</td>
-                    <td className="px-3 py-2 text-gray-500 dark:text-gray-400">{desc}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Datos */}
-          <div>
-            <p className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Fuentes de datos</p>
-            <ul className="space-y-1 list-disc list-inside">
-              <li><strong className="text-gray-700 dark:text-gray-300">Listas de espera:</strong> datos sintéticos calibrados con parámetros reales del SAS. Los datos oficiales no están disponibles por API pública; la extracción automática del BOJA está en desarrollo.</li>
-              <li><strong className="text-gray-700 dark:text-gray-300">Eventos de privatización:</strong> BOJA (boja.juntadeandalucia.es), informes EASP, Defensor del Pueblo Andaluz y fuentes oficiales documentadas.</li>
-              <li><strong className="text-gray-700 dark:text-gray-300">Marco legal:</strong> hitos extraídos de Decreto 209/2018, Ley 7/2013, RD 1030/2006 y resoluciones del Defensor del Pueblo.</li>
-              <li><strong className="text-gray-700 dark:text-gray-300">Presupuesto:</strong> Consejería de Hacienda (Junta de Andalucía), datos.gob.es, Ministerio de Sanidad.</li>
-            </ul>
-          </div>
-
-          {/* Advertencia */}
+        <div className="px-5 py-4 bg-white dark:bg-gray-900 text-xs text-gray-600 dark:text-gray-400 space-y-2.5 leading-relaxed">
+          <p><strong className="text-gray-800 dark:text-gray-200">Mann-Whitney U</strong> — compara demoras 90 días post-evento vs línea base del año anterior. No paramétrico, no asume distribución normal.</p>
+          <p><strong className="text-gray-800 dark:text-gray-200">Corrección FDR</strong> (Benjamini-Hochberg) — controla falsos positivos en 96 comparaciones simultáneas.</p>
+          <p><strong className="text-gray-800 dark:text-gray-200">find_best_lag</strong> — barrido 0–720 h para encontrar el desfase con mayor tamaño del efecto.</p>
+          <p><strong className="text-gray-800 dark:text-gray-200">SignificanceConfig</strong> — umbrales calibrados: efecto fuerte ≥ 0.25, moderado ≥ 0.15, débil ≥ 0.08.</p>
+          <p><strong className="text-gray-800 dark:text-gray-200">Datos</strong> — lista de espera: sintéticos calibrados con parámetros reales SAS (datos oficiales no disponibles por API). Eventos: BOJA y fuentes oficiales documentadas.</p>
           <div className="p-2.5 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
             <p className="font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1"><AlertTriangle size={12}/> Asociación estadística ≠ causalidad</p>
-            <p className="mt-1 text-amber-700 dark:text-amber-400">Factores estacionales, demográficos, pandémicos u otros no controlados pueden explicar los patrones detectados. Este análisis no atribuye responsabilidad individual a ningún actor. Los datos de listas de espera son sintéticos calibrados.</p>
+            <p className="mt-1 text-amber-700 dark:text-amber-400">Factores estacionales, demográficos, pandémicos u otros no controlados pueden explicar los patrones detectados.</p>
           </div>
-
         </div>
       )}
     </div>
@@ -785,6 +784,174 @@ function AssistantChat() {
   )
 }
 
+// ─── Marco legal ──────────────────────────────────────────────────────────────
+
+function MarcoLegal() {
+  const [open, setOpen] = useState(false)
+  const styles = {
+    incumplido: { wrap: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/40', badge: 'bg-red-100 dark:bg-red-800/40 text-red-700 dark:text-red-300', label: 'Incumplido' },
+    activo:     { wrap: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/40', badge: 'bg-amber-100 dark:bg-amber-800/40 text-amber-700 dark:text-amber-300', label: 'Activo / Vigente' },
+    parcial:    { wrap: 'bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800/40', badge: 'bg-sky-100 dark:bg-sky-800/40 text-sky-700 dark:text-sky-300', label: 'Parcial' },
+  }
+  return (
+    <Card className="p-5">
+      <button className="w-full text-left flex items-start justify-between gap-2" onClick={() => setOpen(v => !v)}>
+        <SectionTitle icon={<Scale size={15} />} sub="Normas aplicables, garantías legales y estado de cumplimiento medido">
+          Marco legal y garantías sanitarias
+        </SectionTitle>
+        {open ? <ChevronUp size={13} className="text-gray-400 shrink-0 mt-0.5" /> : <ChevronDown size={13} className="text-gray-400 shrink-0 mt-0.5" />}
+      </button>
+      {open && (
+        <div className="space-y-3 mt-1">
+          {MARCO_LEGAL.map((m, i) => {
+            const st = styles[m.cumplimiento]
+            return (
+              <div key={i} className={`rounded-xl border p-3 ${st.wrap}`}>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="text-xs font-bold text-gray-800 dark:text-gray-100">{m.norma}</div>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${st.badge}`}>{st.label}</span>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-0.5">Garantía legal</div>
+                    <p className="leading-snug text-gray-700 dark:text-gray-300">{m.garantia}</p>
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-0.5">Realidad documentada</div>
+                    <p className="leading-snug text-gray-700 dark:text-gray-300">{m.realidad}</p>
+                  </div>
+                </div>
+                <div className="mt-2 text-[11px] text-gray-500 dark:text-gray-400 italic border-t border-gray-200 dark:border-gray-700/30 pt-1.5 flex items-start gap-1.5">
+                  <span className="shrink-0">→</span>
+                  <span>{m.consecuencia}</span>
+                  {m.url && (
+                    <a href={m.url} target="_blank" rel="noopener noreferrer"
+                      className="ml-1 text-verde-sas hover:underline inline-flex items-center gap-0.5 whitespace-nowrap">
+                      Norma <ExternalLink size={8} />
+                    </a>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 italic">
+            Los incumplimientos son hechos objetivos derivados de datos publicados. No implican juicio sobre intenciones ni causalidad directa.
+          </p>
+        </div>
+      )}
+    </Card>
+  )
+}
+
+// ─── Flujo de dinero ──────────────────────────────────────────────────────────
+
+function DineroPublico() {
+  const maxVal = Math.max(...DINERO_ANUAL.map(d => d.conciertos))
+  const barColor = (d: typeof DINERO_ANUAL[0]) =>
+    d.año === 2018 ? '#6b7280' : d.conciertos > 250 ? '#ef4444' : d.conciertos > 200 ? '#f59e0b' : '#10b981'
+
+  return (
+    <Card className="p-5">
+      <SectionTitle icon={<BarChart2 size={15} />}
+        sub="Estimación gasto SAS en conciertos 2018–2024 (M€) · BOJA + Portal Transparencia Junta AN">
+        Flujo de dinero público a sanidad privada
+      </SectionTitle>
+      <div className="h-44">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={DINERO_ANUAL} margin={{ top: 4, right: 16, bottom: 0, left: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.4} vertical={false} />
+            <XAxis dataKey="año" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
+              tickFormatter={v => `${v}M€`} domain={[0, 360]} />
+            <Tooltip
+              formatter={(v) => [`${v} M€`, 'Conciertos SAS']}
+              labelFormatter={l => `Año ${l}`}
+              contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #e5e7eb' }} />
+            <Bar dataKey="conciertos" radius={[4, 4, 0, 0]}>
+              {DINERO_ANUAL.map((d, i) => <Cell key={i} fill={barColor(d)} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="mt-3 space-y-1.5">
+        {DINERO_ANUAL.map((d, i) => (
+          <div key={i} className="flex items-center gap-2 text-xs">
+            <span className="w-8 text-right tabular-nums text-gray-500 dark:text-gray-400 font-medium">{d.año}</span>
+            <div className="flex-1 bg-gray-100 dark:bg-gray-700/40 rounded-full h-1.5 overflow-hidden">
+              <div className="h-full rounded-full" style={{ width: `${(d.conciertos / maxVal) * 100}%`, background: barColor(d) }} />
+            </div>
+            <span className="w-14 tabular-nums font-semibold text-gray-700 dark:text-gray-300">{d.conciertos} M€</span>
+            {d.deficit > 0 && (
+              <span className="text-red-500 dark:text-red-400 text-[10px] w-20 shrink-0">−{d.deficit.toLocaleString('es')} prof.</span>
+            )}
+            <span className="text-gray-400 dark:text-gray-500 text-[10px] hidden md:block truncate">{d.nota}</span>
+          </div>
+        ))}
+      </div>
+      <p className="text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-2 mt-3 flex items-start gap-1.5">
+        <AlertTriangle size={11} className="mt-0.5 shrink-0" />
+        Total estimado 2019–2024: ~1.423 M€. Cifras aproximadas basadas en BOJA y Portal de Transparencia — no auditadas de forma independiente.
+      </p>
+    </Card>
+  )
+}
+
+// ─── Red de actores ───────────────────────────────────────────────────────────
+
+function ActoresConexiones() {
+  const [open, setOpen] = useState(false)
+  const tipoStyle: Record<string, { wrap: string; label: string }> = {
+    cargo:   { wrap: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300', label: 'Cargo público' },
+    empresa: { wrap: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300', label: 'Empresa' },
+    control: { wrap: 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300', label: 'Control institucional' },
+    civil:   { wrap: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300', label: 'Sociedad civil' },
+  }
+
+  return (
+    <Card className="p-5">
+      <button className="w-full text-left flex items-start justify-between gap-2" onClick={() => setOpen(v => !v)}>
+        <SectionTitle icon={<Users size={15} />} sub="Actores documentados: cargos políticos, empresas adjudicatarias, organismos y sociedad civil">
+          Red de actores e intereses
+        </SectionTitle>
+        {open ? <ChevronUp size={13} className="text-gray-400 shrink-0 mt-0.5" /> : <ChevronDown size={13} className="text-gray-400 shrink-0 mt-0.5" />}
+      </button>
+      {open && (
+        <div className="space-y-2 mt-1">
+          {ACTORES.map((a, i) => {
+            const st = tipoStyle[a.tipo] ?? tipoStyle.civil
+            return (
+              <div key={i} className="rounded-xl border border-gray-100 dark:border-gray-700/40 p-3 flex gap-3">
+                <div className="shrink-0 pt-0.5">
+                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded whitespace-nowrap ${st.wrap}`}>{st.label}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                    <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{a.nombre}</span>
+                    {a.partido && (
+                      <span className="text-[10px] text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">{a.partido}</span>
+                    )}
+                    {a.url && (
+                      <a href={a.url} target="_blank" rel="noopener noreferrer"
+                        className="text-[10px] text-verde-sas hover:underline inline-flex items-center gap-0.5">
+                        Fuente <ExternalLink size={8} />
+                      </a>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400">{a.cargo}</div>
+                  <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-snug">{a.decision}</p>
+                </div>
+              </div>
+            )
+          })}
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 italic">
+            Información de carácter público. No implica juicio sobre legalidad ni intenciones de los actores listados.
+          </p>
+        </div>
+      )}
+    </Card>
+  )
+}
+
 // ─── StatPill ─────────────────────────────────────────────────────────────────
 
 function StatPill({ value, label, color }: { value: number; label: string; color: string }) {
@@ -810,12 +977,6 @@ export default function App() {
   const [analyzing, setAnalyzing]  = useState(false)
   const [toast, setToast]          = useState('')
 
-  // Nuevas secciones
-  const [legalData, setLegalData]   = useState<LegalResponse | null>(null)
-  const [budgetData, setBudgetData] = useState<BudgetResponse | null>(null)
-  const [actorsData, setActorsData] = useState<ActorsResponse | null>(null)
-  const [loadingExtra, setLoadingExtra] = useState(false)
-
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 4500) }
 
   useEffect(() => { document.documentElement.classList.toggle('dark', dark) }, [dark])
@@ -839,19 +1000,6 @@ export default function App() {
   }, [])
 
   useEffect(() => { loadAll() }, [loadAll])
-
-  useEffect(() => {
-    setLoadingExtra(true)
-    Promise.all([
-      api.get('/legal/compliance-impact').catch(() => null),
-      api.get('/budget/analysis').catch(() => null),
-      api.get('/actors/influence').catch(() => null),
-    ]).then(([legalR, budgetR, actorsR]) => {
-      if (legalR)  setLegalData(legalR.data)
-      if (budgetR) setBudgetData(budgetR.data)
-      if (actorsR) setActorsData(actorsR.data)
-    }).finally(() => setLoadingExtra(false))
-  }, [])
 
   const handleRefresh = async () => {
     setRefreshing(true)
@@ -910,11 +1058,6 @@ export default function App() {
               <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''}/>
               <span className="hidden sm:inline">{refreshing ? 'Actualizando…' : 'Actualizar'}</span>
             </button>
-            <a href="/api/report/pdf" download
-              className="hidden sm:flex items-center gap-1.5 text-xs bg-white/15 hover:bg-white/25 text-white rounded-lg px-3 py-1.5 transition-colors"
-              title="Descargar informe estadístico en PDF">
-              <Download size={12}/><span className="hidden md:inline">Informe PDF</span>
-            </a>
             <button onClick={() => setDark(v => !v)} className="p-1.5 bg-white/15 hover:bg-white/25 text-white rounded-lg transition-colors">
               {dark ? <Sun size={13}/> : <Moon size={13}/>}
             </button>
@@ -957,9 +1100,16 @@ export default function App() {
         <ImpactoYPromesas />
 
         {/* ── 3. Marco legal ── */}
-        <LegalComplianceSection data={legalData} loading={loadingExtra} />
+        <MarcoLegal />
 
-        {/* ── 5. Mapa de señales ── */}
+        {/* ── 4. Dinero público ── */}
+        <DineroPublico />
+
+        {/* ── 5. Red de actores ── */}
+        <ActoresConexiones />
+
+        {/* ── 6. Mapa de señales ── */}
+
         <Card className="p-5">
           <SectionTitle icon={<BarChart2 size={15}/>}
             sub="Cada celda = provincia × especialidad. Rojo=fuerte · Naranja=moderada · Azul=débil · Gris=sin señal">
@@ -976,7 +1126,7 @@ export default function App() {
           )}
         </Card>
 
-        {/* ── 5b. Señales destacadas ── */}
+        {/* ── 7. Señales destacadas ── */}
         {results.length > 0 && (
           <Card className="p-5">
             <SectionTitle icon={<TrendingUp size={15}/>}
@@ -987,7 +1137,7 @@ export default function App() {
           </Card>
         )}
 
-        {/* ── 5c. Gráfico ── */}
+        {/* ── 8. Gráfico ── */}
         <Card className="p-5">
           <SectionTitle icon={<Activity size={15}/>}
             sub="Evolución trimestral · líneas rojas = eventos documentados">
@@ -999,66 +1149,35 @@ export default function App() {
             analysisResult={activeResult} />
         </Card>
 
-        {/* ── 6. Flujo de dinero ── */}
-        <BudgetFlowSection data={budgetData} loading={loadingExtra} />
+        {/* ── 9. Cobertura mediática ── */}
+        <Card className="p-4">
+          <SectionTitle icon={<Newspaper size={14}/>} sub="Medios que han cubierto la privatización sanitaria en Andalucía">
+            Cobertura mediática
+          </SectionTitle>
+          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1">
+            {[
+              { medio: 'elDiario.es Andalucía', cobertura: 'Investigación continuada sobre conciertos SAS 2019–2024 con datos del Portal Transparencia.' },
+              { medio: 'El País Andalucía',     cobertura: 'Informes sobre listas de espera, privatización hospitalaria y presupuestos SAS.' },
+              { medio: 'La Marea',              cobertura: 'Reportajes sobre externalización de diagnóstico por imagen y recortes de plantilla.' },
+              { medio: 'RTVE Andalucía',        cobertura: 'Cobertura de manifestaciones Marea Blanca y datos del Defensor del Pueblo.' },
+              { medio: 'Público',               cobertura: 'Análisis presupuestario y cobertura de la Orden BOJA 94/2024.' },
+              { medio: 'Periódico de Andalucía', cobertura: 'Seguimiento de adjudicaciones BOJA y datos de listas de espera por provincia.' },
+            ].map(e => (
+              <div key={e.medio} className="flex gap-2 py-1.5 border-b border-gray-50 dark:border-gray-700/30 last:border-0 text-xs">
+                <div className="w-2 h-2 mt-1 rounded-full bg-sky-400 shrink-0"/>
+                <div>
+                  <span className="font-semibold text-gray-800 dark:text-gray-200">{e.medio}</span>
+                  <span className="text-gray-500 dark:text-gray-400"> — {e.cobertura}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
 
-        {/* ── 7. Red de actores ── */}
-        <ActorsNetworkSection data={actorsData} loading={loadingExtra} />
-
-        {/* ── 8. Empresas e información adicional ── */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          <Card className="p-4">
-            <SectionTitle icon={<Building2 size={14}/>} sub="Principales beneficiarios de conciertos SAS según BOJA y Portal Transparencia">
-              Empresas adjudicatarias
-            </SectionTitle>
-            <ul className="space-y-2 text-xs">
-              {[
-                { nombre: 'Quirónsalud', detalle: 'Grupo Fresenius-Helios (Alemania). Mayor red hospitalaria privada en Andalucía.', esp: 'Traumatología, oftalmología, cirugía' },
-                { nombre: 'Vithas', detalle: 'Grupo Asisa (España). Hospitales en Sevilla, Granada y Málaga.', esp: 'Especialidades médicas y quirúrgicas' },
-                { nombre: 'HM Hospitales', detalle: 'Grupo HM (España). Presencia creciente desde 2021.', esp: 'Oncología, cardiología' },
-                { nombre: 'Hospiten', detalle: 'Grupo Hospiten (España-RU). Fuerte en Málaga y Costa del Sol.', esp: 'Urgencias, traumatología' },
-                { nombre: 'Beata María Ana', detalle: 'Orden religiosa. Hospitales históricos concertados.', esp: 'Diversas especialidades' },
-              ].map(e => (
-                <li key={e.nombre} className="flex gap-2 py-1.5 border-b border-gray-50 dark:border-gray-700/30 last:border-0">
-                  <div className="w-2 h-2 mt-1 rounded-full bg-emerald-400 shrink-0"/>
-                  <div>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{e.nombre}</span>
-                    <span className="text-gray-500 dark:text-gray-400"> — {e.detalle}</span>
-                    <div className="text-gray-400 dark:text-gray-500 italic mt-0.5">{e.esp}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </Card>
-
-          <Card className="p-4">
-            <SectionTitle icon={<Newspaper size={14}/>} sub="Medios que han cubierto la privatización sanitaria en Andalucía">
-              Cobertura mediática
-            </SectionTitle>
-            <ul className="space-y-2 text-xs">
-              {[
-                { medio: 'elDiario.es Andalucía', cobertura: 'Investigación continuada sobre conciertos SAS 2019–2024. Datos de Portal Transparencia.' },
-                { medio: 'El País Andalucía', cobertura: 'Informes sobre listas de espera y privatización hospitalaria.' },
-                { medio: 'La Marea', cobertura: 'Reportajes sobre externalización diagnóstico y recortes de plantilla.' },
-                { medio: 'RTVE Andalucía', cobertura: 'Informativos sobre manifestaciones Marea Blanca y datos Defensor del Pueblo.' },
-                { medio: 'Público', cobertura: 'Análisis presupuestario y cobertura de la Orden BOJA 94/2024.' },
-              ].map(e => (
-                <li key={e.medio} className="flex gap-2 py-1.5 border-b border-gray-50 dark:border-gray-700/30 last:border-0">
-                  <div className="w-2 h-2 mt-1 rounded-full bg-sky-400 shrink-0"/>
-                  <div>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{e.medio}</span>
-                    <span className="text-gray-500 dark:text-gray-400"> — {e.cobertura}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        </div>
-
-        {/* ── 9. Tabla completa ── */}
+        {/* ── 10. Tabla completa ── */}
         {results.length > 0 && <FullResultsTable results={results} />}
 
-        {/* ── 10. Metodología ── */}
+        {/* ── 11. Metodología ── */}
         <Metodologia />
 
       </main>

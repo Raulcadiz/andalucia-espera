@@ -13,6 +13,14 @@ from sqlalchemy.orm import Session
 
 from .models import AnalysisResult, PrivatizacionEvent, WaitingRecord
 
+from chrono_correlator import (  # type: ignore  # noqa: E402
+    calibrate,
+    monitor,
+    save_signature,
+    load_signature,
+    CrisisSignature,
+)
+
 logger = logging.getLogger(__name__)
 
 LOOKBACK_HOURS = 2160   # 90 días antes/después del evento
@@ -266,3 +274,83 @@ def run_analysis(
         len(results_summary), report.level, report.active_signals,
     )
     return results_summary
+
+
+def calibrate_from_db(db: Session, label: str = "lista_espera") -> str:
+    """
+    Calibra una firma de crisis con datos históricos de la BD.
+    Compara períodos pre-privatización contra baseline anual.
+    Devuelve la ruta del JSON guardado.
+
+    Raises:
+        ValueError: Si no hay suficientes eventos o datos históricos.
+        ImportError: Si chrono-correlator no está instalado.
+    """
+    from chrono_correlator import Event, Metric  # type: ignore
+
+    # --- Carga eventos de privatización desde SQLite ---
+    priv_events_db = db.query(PrivatizacionEvent).order_by(
+        PrivatizacionEvent.fecha
+    ).all()
+
+    if not priv_events_db:
+        raise ValueError(
+            "No hay eventos de privatización en la BD. "
+            "Ingesta datos primero con el ingestor."
+        )
+
+    events = [
+        Event(
+            timestamp=datetime.combine(ev.fecha, datetime.min.time()),
+            label=ev.provincia or "andalucia",
+        )
+        for ev in priv_events_db
+    ]
+
+    # --- Carga registros de espera como métricas ---
+    records = db.query(WaitingRecord).order_by(WaitingRecord.fecha).all()
+
+    # Agrupa por especialidad
+    from collections import defaultdict
+    by_espec: dict[str, list[WaitingRecord]] = defaultdict(list)
+    for r in records:
+        by_espec[r.especialidad].append(r)
+
+    metrics: list[Metric] = []
+    for espec, recs in by_espec.items():
+        if len(recs) < 10:
+            continue
+        timestamps = [
+            datetime.combine(r.fecha, datetime.min.time()) for r in recs
+        ]
+        values = [float(r.dias_espera) for r in recs]
+        metrics.append(Metric(name=f"espera_{espec}", timestamps=timestamps, values=values))
+
+    if not metrics:
+        raise ValueError(
+            "No hay suficientes registros de espera para calibrar. "
+            "Se necesitan al menos 10 registros por especialidad."
+        )
+
+    # --- Calibra ---
+    signature = calibrate(
+        events=events,
+        metrics=metrics,
+        label=label,
+        lookback_hours=LOOKBACK_HOURS,
+        baseline_days=BASELINE_DAYS,
+        min_events=3,
+        sweep_lags=True,
+    )
+
+    # --- Guarda JSON ---
+    sig_dir = os.path.join(os.path.dirname(__file__), "..", "data", "signatures")
+    os.makedirs(sig_dir, exist_ok=True)
+    sig_path = os.path.join(sig_dir, f"{label}.json")
+    save_signature(signature, sig_path)
+
+    logger.info(
+        "Firma calibrada: label=%s, confianza=%s, metricas=%d, path=%s",
+        label, signature.confidence, len(signature.metrics), sig_path,
+    )
+    return os.path.abspath(sig_path)
